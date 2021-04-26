@@ -1,8 +1,9 @@
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -18,16 +19,16 @@ namespace API.Controllers
 
         //hämtar alla vehicles, endpoint: api/vehicles
         [HttpGet]
-        public ActionResult<IEnumerable<Vehicle>> GetVehicles()
+        public async Task<ActionResult<IEnumerable<Vehicle>>> GetVehicles()
         {
-            return _context.Vehicles.ToList();
+            return await _context.Vehicles.ToListAsync();
         }
 
         //hämtar en vehicle, endpoint: api/vehicles/id
         [HttpGet("{id}")]
-        public ActionResult<Vehicle> GetVehicle(int id)
+        public async Task<ActionResult<Vehicle>> GetVehicle(int id)
         {
-            return _context.Vehicles.Find(id);
+            return await _context.Vehicles.FindAsync(id);
         }
     }
 }
