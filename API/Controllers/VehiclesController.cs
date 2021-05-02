@@ -56,7 +56,6 @@ namespace API.Controllers
             var vehicle = new Vehicle
             {
                 RegNum = model.RegNum,
-                Brand = model.Brand,
                 Model = model.Model,
                 ModelYear = model.ModelYear,
                 FuelType = model.FuelType,

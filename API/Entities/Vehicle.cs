@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace API.Entities
 {
@@ -6,7 +7,7 @@ namespace API.Entities
     {
         public int Id { get; set; }
         public string RegNum { get; set; }
-        public string Brand { get; set; }
+        public int? BrandId { get; set; }
         public string Model { get; set; }
         public int ModelYear { get; set; }
         public string FuelType { get; set; }
@@ -15,5 +16,8 @@ namespace API.Entities
         public int Mileage { get; set; }
         //public DateTime? RegDate { get; set; }
         
+        //Navgation properties
+        [ForeignKey("BrandId")]
+        public virtual Brand Brand { get; set; }
     }
 }
