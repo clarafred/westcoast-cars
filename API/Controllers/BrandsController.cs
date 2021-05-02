@@ -27,6 +27,13 @@ namespace API.Controllers
         [HttpPost()]
         public async Task<ActionResult> AddBrand(AddNewBrandViewModel model)
         {
+            var brandResult = await _context.Brands.FirstOrDefaultAsync(c => c.Name.ToLower() == model.Name.ToLower());
+
+            if (brandResult != null)
+            {
+                return BadRequest("Brand is already in the system");
+            }
+
             var brand = new Brand
             {
                 Name = model.Name
@@ -40,5 +47,22 @@ namespace API.Controllers
         }
 
         //update
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateBrand(int id, AddNewBrandViewModel model)
+        {
+            var brand = await _context.Brands.FindAsync(id);
+
+            if (brand == null)
+            {
+                return NotFound($"Sorry, no brand found with id {id}");
+            }
+
+            brand.Name = model.Name;
+
+            _context.Brands.Update(brand);
+            var result = await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }
