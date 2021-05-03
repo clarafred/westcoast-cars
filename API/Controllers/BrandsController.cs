@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.Data;
@@ -27,42 +28,65 @@ namespace API.Controllers
         [HttpPost()]
         public async Task<ActionResult> AddBrand(AddNewBrandViewModel model)
         {
-            var brandResult = await _context.Brands.FirstOrDefaultAsync(c => c.Name.ToLower() == model.Name.ToLower());
-
-            if (brandResult != null)
+            try
             {
-                return BadRequest("Brand is already in the system");
+                var brandResult = await _context.Brands.FirstOrDefaultAsync(c => c.Name.ToLower() == model.Name.ToLower());
+
+                if (brandResult != null)
+                {
+                    return BadRequest("Brand is already in the system");
+                }
+
+                var brand = new Brand
+                {
+                    Name = model.Name
+                };
+                
+                _context.Brands.Add(brand);
+
+                var result = await _context.SaveChangesAsync();
+
+                return StatusCode(201, brand);
             }
 
-            var brand = new Brand
+            catch (Exception ex)
             {
-                Name = model.Name
-            };
-            
-            _context.Brands.Add(brand);
-
-            var result = await _context.SaveChangesAsync();
-
-            return StatusCode(201, brand);
+                return StatusCode(500, ex.Message);
+            }
         }
 
         //update
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateBrand(int id, AddNewBrandViewModel model)
         {
-            var brand = await _context.Brands.FindAsync(id);
-
-            if (brand == null)
+            try 
             {
-                return NotFound($"Sorry, no brand found with id {id}");
+                var brand = await _context.Brands.FindAsync(id);
+                
+                if (brand == null)
+                {
+                    return NotFound($"Sorry, no brand found with id {id}");
+                }
+
+                var nameResult = await _context.Brands.FirstOrDefaultAsync(c => c.Name.ToLower() == model.Name.ToLower());
+
+                if (nameResult == null)
+                {
+                    return BadRequest("Brand is already in the system");
+                }
+
+                brand.Name = model.Name;
+
+                _context.Brands.Update(brand);
+                var result = await _context.SaveChangesAsync();
+
+                return NoContent();
             }
 
-            brand.Name = model.Name;
-
-            _context.Brands.Update(brand);
-            var result = await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }
