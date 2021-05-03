@@ -8,6 +8,7 @@ namespace API.Data
         public DbSet<AppUser> Users { get; set; }
         public DbSet<Brand> Brands { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }
+        public DbSet<VehicleModel> VehicleModels { get; set; }
         public DataContext(DbContextOptions options) : base(options)
         {
         }

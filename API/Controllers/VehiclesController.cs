@@ -69,7 +69,7 @@ namespace API.Controllers
             {
                 RegNum = model.RegNum,
                 BrandId = vehicleBrand.Id,
-                Model = model.Model,
+                //Model = model.Model,
                 ModelYear = model.ModelYear,
                 FuelType = model.FuelType,
                 GearType = model.GearType,
@@ -87,7 +87,7 @@ namespace API.Controllers
             {
                 RegNum = vehicle.RegNum,
                 Brand = vehicleBrand.Name,
-                Model = vehicle.Model,
+                //Model = vehicle.Model,
                 ModelYear = vehicle.ModelYear,
                 FuelType = vehicle.FuelType,
                 GearType = vehicle.GearType,

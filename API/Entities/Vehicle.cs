@@ -8,7 +8,7 @@ namespace API.Entities
         public int Id { get; set; }
         public string RegNum { get; set; }
         public int? BrandId { get; set; }
-        public string Model { get; set; }
+        public int? ModelId { get; set; }
         public int ModelYear { get; set; }
         public string FuelType { get; set; }
         public string GearType { get; set; }
@@ -18,5 +18,7 @@ namespace API.Entities
         //Navgation properties
         [ForeignKey("BrandId")]
         public virtual Brand Brand { get; set; }
+        [ForeignKey("ModelId")]
+        public virtual VehicleModel VehicleModel { get; set; }
     }
 }
