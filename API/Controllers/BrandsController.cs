@@ -55,7 +55,6 @@ namespace API.Controllers
             }
         }
 
-        //update
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateBrand(int id, AddNewBrandViewModel model)
         {

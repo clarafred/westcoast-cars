@@ -30,6 +30,12 @@ namespace API.Controllers
         {
             try
             {
+                var modelResult = await _context.VehicleModels.FirstOrDefaultAsync(c => c.Description.ToLower() == model.Description.ToLower());
+
+                if (modelResult != null)
+                {
+                    return BadRequest("Model is already in system");
+                }
                 var vehicleModel = new VehicleModel
                 {
                     Description = model.Description
@@ -39,13 +45,26 @@ namespace API.Controllers
 
                 var result = await _context.SaveChangesAsync();
 
-                return StatusCode(200, vehicleModel);
+                return StatusCode(201, vehicleModel);
             }
 
             catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);
             }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateVehicleModel(int id, AddNewVehicleModelViewModel model)
+        {
+            var vehicleModel = await _context.VehicleModels.FindAsync(id);
+
+            vehicleModel.Description = model.Description;
+
+            _context.VehicleModels.Update(vehicleModel);
+            var result = _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

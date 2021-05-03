@@ -18,6 +18,7 @@ namespace API.Entities
         //Navgation properties
         [ForeignKey("BrandId")]
         public virtual Brand Brand { get; set; }
+        
         [ForeignKey("ModelId")]
         public virtual VehicleModel VehicleModel { get; set; }
     }

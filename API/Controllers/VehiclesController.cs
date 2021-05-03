@@ -53,23 +53,25 @@ namespace API.Controllers
         [HttpPost()]
         public async Task<ActionResult> AddVehicle(AddNewVehicleViewModel model)
         {
-            if (model.Brand == null)
-            {
-                return BadRequest("Please enter brand");
-            }
-
-            var vehicleBrand = await _context.Brands.FirstOrDefaultAsync(c => c.Name.ToLower() == model.Brand.ToLower());
+            var vehicleBrand = await _context.Brands.SingleOrDefaultAsync(c => c.Name.ToLower() == model.Brand.ToLower());
 
             if (vehicleBrand == null)
             {
-                return BadRequest($"Brand {model.Brand} does not excist");
+                return BadRequest($"Brand {model.Brand} does not excist in system");
+            }
+
+            var vehicleModel = await _context.VehicleModels.SingleOrDefaultAsync(c => c.Description.ToLower() == model.Model.ToLower());
+
+            if (vehicleModel == null)
+            {
+                return BadRequest($"Model {model.Model} does not excist in system");
             }
 
             var vehicle = new Vehicle
             {
                 RegNum = model.RegNum,
                 BrandId = vehicleBrand.Id,
-                //Model = model.Model,
+                ModelId = vehicleModel.Id,
                 ModelYear = model.ModelYear,
                 FuelType = model.FuelType,
                 GearType = model.GearType,
@@ -83,11 +85,12 @@ namespace API.Controllers
             //sparar data fysiskt till databasen
             var result = await _context.SaveChangesAsync();
 
+            //mappa till en view model för retur
             var newVehicle = new VehicleViewModel
             {
                 RegNum = vehicle.RegNum,
                 Brand = vehicleBrand.Name,
-                //Model = vehicle.Model,
+                Model = vehicleModel.Description,
                 ModelYear = vehicle.ModelYear,
                 FuelType = vehicle.FuelType,
                 GearType = vehicle.GearType,
