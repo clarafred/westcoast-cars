@@ -53,16 +53,28 @@ namespace API.Controllers
         [HttpPost()]
         public async Task<ActionResult> AddVehicle(AddNewVehicleViewModel model)
         {
+            if (model.Brand == null)
+            {
+                return BadRequest("Please enter brand");
+            }
+
+            var vehicleBrand = await _context.Brands.FirstOrDefaultAsync(c => c.Name.ToLower() == model.Brand.ToLower());
+
+            if (vehicleBrand == null)
+            {
+                return BadRequest($"Brand {model.Brand} does not excist");
+            }
+
             var vehicle = new Vehicle
             {
                 RegNum = model.RegNum,
+                BrandId = vehicleBrand.Id,
                 Model = model.Model,
                 ModelYear = model.ModelYear,
                 FuelType = model.FuelType,
                 GearType = model.GearType,
                 Color = model.Color,
                 Mileage = model.Mileage
-                //RegDate = model.RegDate
             };
 
             //lägger till vehicle till ChangeTracking
@@ -71,8 +83,20 @@ namespace API.Controllers
             //sparar data fysiskt till databasen
             var result = await _context.SaveChangesAsync();
 
+            var newVehicle = new VehicleViewModel
+            {
+                RegNum = vehicle.RegNum,
+                Brand = vehicleBrand.Name,
+                Model = vehicle.Model,
+                ModelYear = vehicle.ModelYear,
+                FuelType = vehicle.FuelType,
+                GearType = vehicle.GearType,
+                Color = vehicle.Color,
+                Mileage = vehicle.Mileage
+            };
+
             //return CreatedAtAction(nameof(GetVehicle), result);
-            return StatusCode(201, vehicle);
+            return StatusCode(201, newVehicle);
         }
 
         [HttpDelete("{id}")]
@@ -103,7 +127,6 @@ namespace API.Controllers
 
             vehicle.Color = model.Color;
             vehicle.Mileage = model.Mileage;
-            //vehicle.RegDate = model.RegDate;
 
             _context.Vehicles.Update(vehicle);
             var result = await _context.SaveChangesAsync();

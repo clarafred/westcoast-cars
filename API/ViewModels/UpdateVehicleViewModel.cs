@@ -6,6 +6,5 @@ namespace API.ViewModels
     {
         public string Color { get; set; }
         public int Mileage { get; set; }
-        //public DateTime RegDate { get; set; }
     }
 }
