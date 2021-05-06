@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
+using API.Interfaces;
 using API.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,16 +14,16 @@ namespace API.Controllers
     [Route("api/vehiclemodels")]
     public class VehicleModelsController : ControllerBase
     {
-        private readonly DataContext _context;
-        public VehicleModelsController(DataContext context)
+        private readonly IVehicleModelRepository _modelRepo;
+        public VehicleModelsController(IVehicleModelRepository modelRepo)
         {
-            _context = context;
+            _modelRepo = modelRepo;
         }
-        
+
         [HttpGet()]
-        public async Task<ActionResult<IEnumerable<VehicleModel>>> GetVehicleModels() 
+        public async Task<ActionResult<IEnumerable<VehicleModel>>> GetVehicleModels()
         {
-            return await _context.VehicleModels.ToListAsync();
+            return Ok(await _modelRepo.GetModelsAsync());
         }
 
         [HttpPost()]
@@ -30,22 +31,17 @@ namespace API.Controllers
         {
             try
             {
-                var modelResult = await _context.VehicleModels.FirstOrDefaultAsync(c => c.Description.ToLower() == model.Description.ToLower());
+                var vehicleModel = await _modelRepo.GetModelByNameAsync(model.Description);
+                if (vehicleModel != null) return BadRequest("Model is already in system");
 
-                if (modelResult != null)
-                {
-                    return BadRequest("Model is already in system");
-                }
-                var vehicleModel = new VehicleModel
+                var newModel = new VehicleModel
                 {
                     Description = model.Description
-                };
+                };              
 
-                _context.VehicleModels.Add(vehicleModel);
+                if (await _modelRepo.SaveAllAsync()) return StatusCode(201, newModel);
 
-                var result = await _context.SaveChangesAsync();
-
-                return StatusCode(201, vehicleModel);
+                return StatusCode(500, "Not able to save model");
             }
 
             catch (Exception ex)
@@ -57,14 +53,18 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateVehicleModel(int id, AddVehicleModelDto model)
         {
-            var vehicleModel = await _context.VehicleModels.FindAsync(id);
+            var vehicleModel = await _modelRepo.GetModelByIdAsync(id);
+            if (vehicleModel == null) return NotFound($"No model found with id {id}");
+
+            //var modelName = await _context.VehicleModels.FirstOrDefaultAsync(c => c.Name.ToLower() == model.Name.ToLower());
+            //if (modelName == null) return BadRequest("Model is already in the system");
 
             vehicleModel.Description = model.Description;
+            _modelRepo.Update(vehicleModel);
 
-            _context.VehicleModels.Update(vehicleModel);
-            var result = _context.SaveChangesAsync();
+            if (await _modelRepo.SaveAllAsync()) return StatusCode(201, vehicleModel);
 
-            return NoContent();
+            return StatusCode(500, "Not able to update model");
         }
     }
 }

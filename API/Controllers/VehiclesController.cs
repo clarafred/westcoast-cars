@@ -14,19 +14,21 @@ namespace API.Controllers
     [Route("api/vehicles")]
     public class VehiclesController : ControllerBase
     {
-        private readonly DataContext _context;
         private readonly IVehicleRepository _vehicleRepo;
         private readonly IMapper _mapper;
-        public VehiclesController(DataContext context, IVehicleRepository vehicleRepo, IMapper mapper)
+        private readonly BrandRepository _brandRepo;
+        private readonly IVehicleModelRepository _modelRepo;
+        public VehiclesController(IVehicleRepository vehicleRepo, BrandRepository brandRepo, IVehicleModelRepository modelRepo, IMapper mapper)
         {
-            _context = context;
             _vehicleRepo = vehicleRepo;
+            _brandRepo = brandRepo;
+            _modelRepo = modelRepo;
             _mapper = mapper;
         }
 
         [HttpGet()]
         public async Task<ActionResult<IEnumerable<Vehicle>>> GetVehicles()
-        {          
+        {
             var result = await _vehicleRepo.GetVehiclesAsync();
             var vehicles = _mapper.Map<IEnumerable<VehicleViewModel>>(result);
             return Ok(vehicles);
@@ -50,23 +52,23 @@ namespace API.Controllers
             if (result == null) return NotFound($"No vehicle found with registration number {regNum}");
 
             var vehicle = _mapper.Map<VehicleViewModel>(result);
-            
+
             return Ok(vehicle);
         }
 
         [HttpPost()]
         public async Task<ActionResult> AddVehicle(AddVehicleDto model)
         {
-            var vehicleBrand = await _context.Brands.SingleOrDefaultAsync(c => c.Name.ToLower() == model.Brand.ToLower());
-            if (vehicleBrand == null) return BadRequest($"Brand {model.Brand} does not excist in system");
+            var brand = await _brandRepo.GetBrandByNameAsync(model.Brand);
+            if (brand == null) return BadRequest($"Brand {model.Brand} does not excist in system");
 
-            var vehicleModel = await _context.VehicleModels.SingleOrDefaultAsync(c => c.Description.ToLower() == model.Model.ToLower());
+            var vehicleModel = await _modelRepo.GetModelByNameAsync(model.Model);
             if (vehicleModel == null) return BadRequest($"Model {model.Model} does not excist in system");
 
             var vehicle = new Vehicle
             {
                 RegNum = model.RegNum,
-                BrandId = vehicleBrand.Id,
+                BrandId = brand.Id,
                 ModelId = vehicleModel.Id,
                 ModelYear = model.ModelYear,
                 FuelType = model.FuelType,
@@ -75,46 +77,46 @@ namespace API.Controllers
                 Mileage = model.Mileage
             };
 
-            //lägger till vehicle till ChangeTracking
-            _context.Vehicles.Add(vehicle);
+            _vehicleRepo.Add(vehicle);
 
             //sparar data fysiskt till databasen
-            var result = await _context.SaveChangesAsync();
+            if (await _vehicleRepo.SaveAllAsync()) return StatusCode(201, vehicle);
+
+            return StatusCode(500, "Not able to save vehicle");
 
             //mappa till en view model för retur
-            var  newVehicle = _mapper.Map<VehicleViewModel>(vehicle);
+            //var newVehicle = _mapper.Map<VehicleViewModel>(vehicle);
 
             //return CreatedAtAction(nameof(GetVehicle), result);
-            return StatusCode(201, newVehicle);
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteVehicle(int id)
-        {
-            var vehicle = await _context.Vehicles.FindAsync(id);
-
-            if (vehicle == null) return NotFound($"No vehicle found with id {id}");
-
-            _context.Vehicles.Remove(vehicle);
-            var result = await _context.SaveChangesAsync();
-
-            return NoContent();
+            //return StatusCode(201, newVehicle);
         }
 
         [HttpPatch("{id}")]
         public async Task<ActionResult> UpdateVehicle(int id, UpdateVehicleDto model)
         {
-            var vehicle = await _context.Vehicles.FindAsync(id);
-
+            var vehicle = await _vehicleRepo.GetVehicleByIdAsync(id);
             if (vehicle == null) return NotFound($"No vehicle found with id {id}");
 
             vehicle.Color = model.Color;
             vehicle.Mileage = model.Mileage;
 
-            _context.Vehicles.Update(vehicle);
-            var result = await _context.SaveChangesAsync();
+            _vehicleRepo.Update(vehicle);
+            if (await _vehicleRepo.SaveAllAsync()) return NoContent();
 
-            return NoContent();
+            return StatusCode(500, "Not able to update vehicle");
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteVehicle(int id)
+        {
+            var vehicle = await _vehicleRepo.GetVehicleByIdAsync(id);
+            if (vehicle == null) return NotFound($"No vehicle found with id {id}");
+
+            _vehicleRepo.Delete(vehicle);
+            
+            if (await _vehicleRepo.SaveAllAsync()) return NoContent();
+
+            return StatusCode(500, "Not able to delete vehicle");
         }
     }
 }

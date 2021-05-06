@@ -50,5 +50,23 @@ namespace API.Data
             .SingleOrDefaultAsync(c => c.RegNum == regNum);
         }
 
+        public async Task<bool> SaveAllAsync()
+        {
+            return await _context.SaveChangesAsync() > 0;
+        }
+        public void Add(Vehicle vehicle)
+        {
+            _context.Entry(vehicle).State = EntityState.Added;
+        }
+
+        public void Update(Vehicle vehicle)
+        {
+            _context.Entry(vehicle).State = EntityState.Modified;
+        }
+
+        public void Delete(Vehicle vehicle)
+        {
+            _context.Entry(vehicle).State = EntityState.Deleted;
+        }
     }
 }
