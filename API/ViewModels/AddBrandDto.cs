@@ -1,6 +1,6 @@
 namespace API.ViewModels
 {
-    public class AddNewBrandViewModel
+    public class AddBrandDto
     {
         public string Name { get; set; }
     }

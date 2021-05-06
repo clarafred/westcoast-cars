@@ -28,7 +28,7 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<Vehicle>>> GetVehicles()
         {          
             var result = await _vehicleRepo.GetVehiclesAsync();
-            var vehicles = _mapper.Map<IEnumerable<PresVehicleViewModel>>(result);
+            var vehicles = _mapper.Map<IEnumerable<VehicleViewModel>>(result);
             return Ok(vehicles);
         }
 
@@ -36,48 +36,32 @@ namespace API.Controllers
         public async Task<ActionResult<Vehicle>> GetVehicle(int id)
         {
             var result = await _vehicleRepo.GetVehicleByIdAsync(id);
-            var vehicle = _mapper.Map<PresVehicleViewModel>(result);
-            return Ok(vehicle);
+            if (result == null) return NotFound($"No vehicle found with id {id}");
 
-            /*
-            if (vehicle == null)
-            {
-                return NotFound($"Sorry, no vehicle found with id {id}");
-            }
-            */
+            var vehicle = _mapper.Map<VehicleViewModel>(result);
+
+            return Ok(vehicle);
         }
 
         [HttpGet("find/{regNum}")]
         public async Task<ActionResult<Vehicle>> FindVehicle(string regNum)
         {
             var result = await _vehicleRepo.GetVehicleByRegNumAsync(regNum);
-            var vehicle = _mapper.Map<PresVehicleViewModel>(result);
-            return Ok(vehicle);
+            if (result == null) return NotFound($"No vehicle found with registration number {regNum}");
 
-            /*
-            if (vehicle == null)
-            {
-                return NotFound($"Sorry, no vehicle found with registration number {regNum}");
-            }
-            */
+            var vehicle = _mapper.Map<VehicleViewModel>(result);
+            
+            return Ok(vehicle);
         }
 
         [HttpPost()]
-        public async Task<ActionResult> AddVehicle(AddNewVehicleViewModel model)
+        public async Task<ActionResult> AddVehicle(AddVehicleDto model)
         {
             var vehicleBrand = await _context.Brands.SingleOrDefaultAsync(c => c.Name.ToLower() == model.Brand.ToLower());
-
-            if (vehicleBrand == null)
-            {
-                return BadRequest($"Brand {model.Brand} does not excist in system");
-            }
+            if (vehicleBrand == null) return BadRequest($"Brand {model.Brand} does not excist in system");
 
             var vehicleModel = await _context.VehicleModels.SingleOrDefaultAsync(c => c.Description.ToLower() == model.Model.ToLower());
-
-            if (vehicleModel == null)
-            {
-                return BadRequest($"Model {model.Model} does not excist in system");
-            }
+            if (vehicleModel == null) return BadRequest($"Model {model.Model} does not excist in system");
 
             var vehicle = new Vehicle
             {
@@ -98,7 +82,7 @@ namespace API.Controllers
             var result = await _context.SaveChangesAsync();
 
             //mappa till en view model för retur
-            var  newVehicle = _mapper.Map<PresVehicleViewModel>(vehicle);
+            var  newVehicle = _mapper.Map<VehicleViewModel>(vehicle);
 
             //return CreatedAtAction(nameof(GetVehicle), result);
             return StatusCode(201, newVehicle);
@@ -109,10 +93,7 @@ namespace API.Controllers
         {
             var vehicle = await _context.Vehicles.FindAsync(id);
 
-            if (vehicle == null)
-            {
-                return NotFound($"Sorry, no vehicle found with id {id}");
-            }
+            if (vehicle == null) return NotFound($"No vehicle found with id {id}");
 
             _context.Vehicles.Remove(vehicle);
             var result = await _context.SaveChangesAsync();
@@ -121,14 +102,11 @@ namespace API.Controllers
         }
 
         [HttpPatch("{id}")]
-        public async Task<ActionResult> UpdateVehicle(int id, UpdateVehicleViewModel model)
+        public async Task<ActionResult> UpdateVehicle(int id, UpdateVehicleDto model)
         {
             var vehicle = await _context.Vehicles.FindAsync(id);
 
-            if (vehicle == null)
-            {
-                return NotFound($"Sorry, no vehicle found with id {id}");
-            }
+            if (vehicle == null) return NotFound($"No vehicle found with id {id}");
 
             vehicle.Color = model.Color;
             vehicle.Mileage = model.Mileage;

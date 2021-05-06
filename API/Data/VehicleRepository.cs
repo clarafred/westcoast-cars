@@ -31,12 +31,12 @@ namespace API.Data
             .SingleOrDefaultAsync(c => c.Id == id);
         }
 
-        public async Task<PresVehicleViewModel> GetVehicleByRegNumAsync(string regNum)
+        public async Task<VehicleViewModel> GetVehicleByRegNumAsync(string regNum)
         {
             return await _context.Vehicles
             .Include(c => c.Brand)
             .Include(c => c.Model)
-            .Select(v => new PresVehicleViewModel{
+            .Select(v => new VehicleViewModel{
                 Id = v.Id,
                 RegNum = v.RegNum,
                 Brand = v.Brand.Name,

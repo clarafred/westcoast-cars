@@ -9,6 +9,6 @@ namespace API.Interfaces
     {
         Task<IEnumerable<Vehicle>> GetVehiclesAsync();
         Task<Vehicle> GetVehicleByIdAsync(int id);
-        Task<PresVehicleViewModel> GetVehicleByRegNumAsync(string regNum);
+        Task<VehicleViewModel> GetVehicleByRegNumAsync(string regNum);
     }
 }

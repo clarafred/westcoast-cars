@@ -1,6 +1,6 @@
 namespace API.ViewModels
 {
-    public class UpdateUserViewModel
+    public class UpdateUserDto
     {
         public string City { get; set; }
         public string Email { get; set; }

@@ -1,6 +1,6 @@
 namespace API.ViewModels
 {
-    public class RegisterUserViewModel
+    public class RegisterUserDto
     {
         public string UserName { get; set; }
         public string FirstName { get; set; }

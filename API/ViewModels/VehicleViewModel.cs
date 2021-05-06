@@ -1,6 +1,6 @@
 namespace API.ViewModels
 {
-    public class PresVehicleViewModel
+    public class VehicleViewModel
     {
         public int Id { get; set; }
         public string RegNum { get; set; }

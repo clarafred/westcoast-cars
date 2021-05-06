@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace API.ViewModels
 {
-    public class AddNewVehicleViewModel
+    public class AddVehicleDto
     {
         public string RegNum { get; set; }
 

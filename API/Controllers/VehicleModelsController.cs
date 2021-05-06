@@ -26,7 +26,7 @@ namespace API.Controllers
         }
 
         [HttpPost()]
-        public async Task<ActionResult> AddVehicleModel(AddNewVehicleModelViewModel model)
+        public async Task<ActionResult> AddVehicleModel(AddVehicleModelDto model)
         {
             try
             {
@@ -55,7 +55,7 @@ namespace API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateVehicleModel(int id, AddNewVehicleModelViewModel model)
+        public async Task<ActionResult> UpdateVehicleModel(int id, AddVehicleModelDto model)
         {
             var vehicleModel = await _context.VehicleModels.FindAsync(id);
 

@@ -29,7 +29,7 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<Brand>>> GetBrands()
         {
             var result = await _brandRepo.GetBrandsAsync();
-            var brands = _mapper.Map<IEnumerable<PresBrandViewModel>>(result);
+            var brands = _mapper.Map<IEnumerable<BrandViewModel>>(result);
             return Ok(brands);
         }
 
@@ -37,23 +37,20 @@ namespace API.Controllers
         public async Task<ActionResult<Brand>> GetBrandByName(string name)
         {
             var result = await _brandRepo.GetBrandByNameAsync(name);
-            var brand = _mapper.Map<PresBrandViewModel>(result);
-            return Ok(brand);
+            if (result == null) return NotFound($"Brand {name} does not excist in system");
+            
+            var brand = _mapper.Map<BrandViewModel>(result);
 
-            //hantera om namnet ej finns
+            return Ok(brand);
         }
 
         [HttpPost()]
-        public async Task<ActionResult> AddBrand(AddNewBrandViewModel model)
+        public async Task<ActionResult> AddBrand(AddBrandDto model)
         {
             try
             {
                 var brandResult = await _context.Brands.FirstOrDefaultAsync(c => c.Name.ToLower() == model.Name.ToLower());
-
-                if (brandResult != null)
-                {
-                    return BadRequest("Brand is already in the system");
-                }
+                if (brandResult != null) return BadRequest("Brand is already in the system");
 
                 var brand = new Brand
                 {
@@ -74,26 +71,17 @@ namespace API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateBrand(int id, AddNewBrandViewModel model)
+        public async Task<ActionResult> UpdateBrand(int id, AddBrandDto model)
         {
             try
             {
                 var brand = await _context.Brands.FindAsync(id);
-
-                if (brand == null)
-                {
-                    return NotFound($"Sorry, no brand found with id {id}");
-                }
+                if (brand == null) return NotFound($"Sorry, no brand found with id {id}");
 
                 var nameResult = await _context.Brands.FirstOrDefaultAsync(c => c.Name.ToLower() == model.Name.ToLower());
-
-                if (nameResult == null)
-                {
-                    return BadRequest("Brand is already in the system");
-                }
+                if (nameResult == null) return BadRequest("Brand is already in the system");
 
                 brand.Name = model.Name;
-
                 _context.Brands.Update(brand);
                 var result = await _context.SaveChangesAsync();
 

@@ -1,6 +1,6 @@
 namespace API.ViewModels
 {
-    public class AddNewVehicleModelViewModel
+    public class AddVehicleModelDto
     {
         public string Description { get; set; }
     }

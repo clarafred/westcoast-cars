@@ -53,7 +53,7 @@ namespace API.Controllers
         */
 
         [HttpPost()]
-        public async Task<ActionResult> AddUser(RegisterUserViewModel model)
+        public async Task<ActionResult> AddUser(RegisterUserDto model)
         {
             var user = new AppUser
             {
@@ -90,7 +90,7 @@ namespace API.Controllers
         }
 
         [HttpPatch("{id}")]
-        public async Task<ActionResult> UpdateVehicle(int id, UpdateUserViewModel model)
+        public async Task<ActionResult> UpdateVehicle(int id, UpdateUserDto model)
         {
             var user = await _context.Users.FindAsync(id);
 
