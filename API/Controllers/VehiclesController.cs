@@ -30,8 +30,6 @@ namespace API.Controllers
             var result = await _vehicleRepo.GetVehiclesAsync();
             var vehicles = _mapper.Map<IEnumerable<PresVehicleViewModel>>(result);
             return Ok(vehicles);
-
-            //return await _context.Vehicles.ToListAsync();
         }
 
         [HttpGet("{id}")]

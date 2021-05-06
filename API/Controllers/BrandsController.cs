@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
+using API.Interfaces;
 using API.ViewModels;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,15 +16,31 @@ namespace API.Controllers
     public class BrandsController : ControllerBase
     {
         private readonly DataContext _context;
-        public BrandsController(DataContext context)
+        private readonly IBrandRepository _brandRepo;
+        private readonly IMapper _mapper;
+        public BrandsController(DataContext context, IBrandRepository brandRepo, IMapper mapper)
         {
             _context = context;
+            _brandRepo = brandRepo;
+            _mapper = mapper;
         }
 
         [HttpGet()]
-        public async Task<ActionResult<IEnumerable<Brand>>> GetBrands() 
+        public async Task<ActionResult<IEnumerable<Brand>>> GetBrands()
         {
-            return await _context.Brands.ToListAsync();
+            var result = await _brandRepo.GetBrandsAsync();
+            var brands = _mapper.Map<IEnumerable<PresBrandViewModel>>(result);
+            return Ok(brands);
+        }
+
+        [HttpGet("{name}")]
+        public async Task<ActionResult<Brand>> GetBrandByName(string name)
+        {
+            var result = await _brandRepo.GetBrandByNameAsync(name);
+            var brand = _mapper.Map<PresBrandViewModel>(result);
+            return Ok(brand);
+
+            //hantera om namnet ej finns
         }
 
         [HttpPost()]
@@ -41,7 +59,7 @@ namespace API.Controllers
                 {
                     Name = model.Name
                 };
-                
+
                 _context.Brands.Add(brand);
 
                 var result = await _context.SaveChangesAsync();
@@ -58,10 +76,10 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateBrand(int id, AddNewBrandViewModel model)
         {
-            try 
+            try
             {
                 var brand = await _context.Brands.FindAsync(id);
-                
+
                 if (brand == null)
                 {
                     return NotFound($"Sorry, no brand found with id {id}");
