@@ -20,6 +20,6 @@ namespace API.Entities
         public virtual Brand Brand { get; set; }
         
         [ForeignKey("ModelId")]
-        public virtual VehicleModel VehicleModel { get; set; }
+        public virtual VehicleModel Model { get; set; }
     }
 }

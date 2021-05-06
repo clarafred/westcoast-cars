@@ -2,7 +2,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
+using API.Interfaces;
 using API.ViewModels;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,35 +15,70 @@ namespace API.Controllers
     public class VehiclesController : ControllerBase
     {
         private readonly DataContext _context;
-        public VehiclesController(DataContext context)
+        private readonly IVehicleRepository _vehicleRepo;
+        private readonly IMapper _mapper;
+        public VehiclesController(DataContext context, IVehicleRepository vehicleRepo, IMapper mapper)
         {
             _context = context;
+            _vehicleRepo = vehicleRepo;
+            _mapper = mapper;
         }
 
         [HttpGet()]
         public async Task<ActionResult<IEnumerable<Vehicle>>> GetVehicles()
         {
-            return await _context.Vehicles.ToListAsync();
+            var vehicles = new List<PresVehicleViewModel>();
+
+            var result = await _context.Vehicles
+                .Include(c => c.Brand)
+                .Include(c => c.Model)
+                .ToListAsync();
+
+            foreach (var vehicle in result)
+            {
+                var v = new PresVehicleViewModel
+                    {
+                    Id = vehicle.Id,
+                    RegNum = vehicle.RegNum,
+                    Brand = vehicle.Brand.Name,
+                    Model = vehicle.Model.Description,
+                    ModelYear = vehicle.ModelYear,
+                    FuelType = vehicle.FuelType,
+                    GearType = vehicle.GearType,
+                    Color = vehicle.Color,
+                    Mileage = vehicle.Mileage,
+                };
+
+                vehicles.Add(v);
+            }
+
+            return Ok(vehicles);
+
+            //return await _context.Vehicles.ToListAsync();
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Vehicle>> GetVehicle(int id)
         {
-            var vehicle = await _context.Vehicles.FindAsync(id);
-            
+            var result = await _vehicleRepo.GetVehicleById(id);
+
+            var vehicle = _mapper.Map<PresVehicleViewModel>(result);
+            /*
             if (vehicle == null)
             {
                 return NotFound($"Sorry, no vehicle found with id {id}");
             }
 
             return vehicle;
+            */
+            return Ok(vehicle);
         }
 
         [HttpGet("{regNum}")]
         public async Task<ActionResult<Vehicle>> FindVehicle(string regNum)
         {
             var vehicle = await _context.Vehicles.FirstOrDefaultAsync(c => c.RegNum == regNum);
-            
+
             if (vehicle == null)
             {
                 return NotFound($"Sorry, no vehicle found with registration number {regNum}");
@@ -86,7 +123,7 @@ namespace API.Controllers
             var result = await _context.SaveChangesAsync();
 
             //mappa till en view model för retur
-            var newVehicle = new VehicleViewModel
+            var newVehicle = new PresVehicleViewModel
             {
                 RegNum = vehicle.RegNum,
                 Brand = vehicleBrand.Name,

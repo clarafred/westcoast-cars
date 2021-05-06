@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Helpers;
+using API.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -32,6 +34,10 @@ namespace API
                 //options.UseSqlite(_config.GetConnectionString("DefaultConnection"));
                 options.UseSqlServer(_config.GetConnectionString("DefaultConnection"));
             });
+
+            services.AddScoped<IVehicleRepository, VehicleRepository>();
+
+            services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
 
             services.AddControllers();
 
