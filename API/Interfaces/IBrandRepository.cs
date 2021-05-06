@@ -7,6 +7,10 @@ namespace API.Interfaces
     public interface IBrandRepository
     {
         Task<IEnumerable<Brand>> GetBrandsAsync();
+        Task<Brand> GetBrandByIdAsync(int id);
         Task<Brand> GetBrandByNameAsync(string name);
+        Task<bool> SaveAllAsync();
+        void Add(Brand brand);
+        void Update(Brand brand);
     }
 }

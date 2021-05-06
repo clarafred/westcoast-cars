@@ -15,12 +15,10 @@ namespace API.Controllers
     [Route("api/brands")]
     public class BrandsController : ControllerBase
     {
-        private readonly DataContext _context;
         private readonly IBrandRepository _brandRepo;
         private readonly IMapper _mapper;
-        public BrandsController(DataContext context, IBrandRepository brandRepo, IMapper mapper)
+        public BrandsController(IBrandRepository brandRepo, IMapper mapper)
         {
-            _context = context;
             _brandRepo = brandRepo;
             _mapper = mapper;
         }
@@ -49,7 +47,7 @@ namespace API.Controllers
         {
             try
             {
-                var brandResult = await _context.Brands.FirstOrDefaultAsync(c => c.Name.ToLower() == model.Name.ToLower());
+                var brandResult = await _brandRepo.GetBrandByNameAsync(model.Name);
                 if (brandResult != null) return BadRequest("Brand is already in the system");
 
                 var brand = new Brand
@@ -57,11 +55,11 @@ namespace API.Controllers
                     Name = model.Name
                 };
 
-                _context.Brands.Add(brand);
+                _brandRepo.Add(brand);
 
-                var result = await _context.SaveChangesAsync();
+                if (await _brandRepo.SaveAllAsync()) return StatusCode(201, brand);
 
-                return StatusCode(201, brand);
+                return StatusCode(500, "Not able to save brand");
             }
 
             catch (Exception ex)
@@ -75,17 +73,18 @@ namespace API.Controllers
         {
             try
             {
-                var brand = await _context.Brands.FindAsync(id);
-                if (brand == null) return NotFound($"Sorry, no brand found with id {id}");
+                var brand = await _brandRepo.GetBrandByIdAsync(id);
+                if (brand == null) return NotFound($"No brand found with id {id}");
 
-                var nameResult = await _context.Brands.FirstOrDefaultAsync(c => c.Name.ToLower() == model.Name.ToLower());
-                if (nameResult == null) return BadRequest("Brand is already in the system");
+                //var nameResult = await _context.Brands.FirstOrDefaultAsync(c => c.Name.ToLower() == model.Name.ToLower());
+                //if (nameResult == null) return BadRequest("Brand is already in the system");
 
                 brand.Name = model.Name;
-                _context.Brands.Update(brand);
-                var result = await _context.SaveChangesAsync();
+                _brandRepo.Update(brand);
 
-                return NoContent();
+                if (await _brandRepo.SaveAllAsync()) return NoContent();
+
+                return StatusCode(500, "Not able to update brand");
             }
 
             catch (Exception ex)
