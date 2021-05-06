@@ -8,7 +8,11 @@ namespace API.Helpers
     {
         public AutoMapperProfile()
         {
-            CreateMap<Vehicle, PresVehicleViewModel>();
+            CreateMap<Vehicle, PresVehicleViewModel>()
+                .ForMember(dest => dest.Brand, opt => opt.MapFrom(src => src.Brand.Name))
+                .ForMember(dest => dest.Model, opt => opt.MapFrom(src => src.Model.Description));
+
+                CreateMap<AddNewVehicleViewModel, Vehicle>();
         }
     }
 }

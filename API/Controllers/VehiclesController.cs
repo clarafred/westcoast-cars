@@ -26,29 +26,9 @@ namespace API.Controllers
 
         [HttpGet()]
         public async Task<ActionResult<IEnumerable<Vehicle>>> GetVehicles()
-        {
-            var vehicles = new List<PresVehicleViewModel>();
-            
+        {          
             var result = await _vehicleRepo.GetVehiclesAsync();
-
-            foreach (var vehicle in result)
-            {
-                var v = new PresVehicleViewModel
-                    {
-                    Id = vehicle.Id,
-                    RegNum = vehicle.RegNum,
-                    Brand = vehicle.Brand.Name,
-                    Model = vehicle.Model.Description,
-                    ModelYear = vehicle.ModelYear,
-                    FuelType = vehicle.FuelType,
-                    GearType = vehicle.GearType,
-                    Color = vehicle.Color,
-                    Mileage = vehicle.Mileage
-                };
-
-                vehicles.Add(v);
-            }
-
+            var vehicles = _mapper.Map<IEnumerable<PresVehicleViewModel>>(result);
             return Ok(vehicles);
 
             //return await _context.Vehicles.ToListAsync();
@@ -66,8 +46,6 @@ namespace API.Controllers
             {
                 return NotFound($"Sorry, no vehicle found with id {id}");
             }
-
-            return vehicle;
             */
         }
 
@@ -75,6 +53,8 @@ namespace API.Controllers
         public async Task<ActionResult<Vehicle>> FindVehicle(string regNum)
         {
             var result = await _vehicleRepo.GetVehicleByRegNumAsync(regNum);
+            var vehicle = _mapper.Map<PresVehicleViewModel>(result);
+            return Ok(vehicle);
 
             /*
             if (vehicle == null)
@@ -82,8 +62,6 @@ namespace API.Controllers
                 return NotFound($"Sorry, no vehicle found with registration number {regNum}");
             }
             */
-
-            return Ok(result);
         }
 
         [HttpPost()]
@@ -122,14 +100,7 @@ namespace API.Controllers
             var result = await _context.SaveChangesAsync();
 
             //mappa till en view model för retur
-            var newVehicle = new PresVehicleViewModel
-            {
-                RegNum = vehicle.RegNum,
-                Brand = vehicleBrand.Name,
-                Model = vehicleModel.Description,
-                ModelYear = vehicle.ModelYear,
-                Color = vehicle.Color,
-            };
+            var  newVehicle = _mapper.Map<PresVehicleViewModel>(vehicle);
 
             //return CreatedAtAction(nameof(GetVehicle), result);
             return StatusCode(201, newVehicle);
