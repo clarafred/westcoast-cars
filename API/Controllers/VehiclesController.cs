@@ -28,11 +28,8 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<Vehicle>>> GetVehicles()
         {
             var vehicles = new List<PresVehicleViewModel>();
-
-            var result = await _context.Vehicles
-                .Include(c => c.Brand)
-                .Include(c => c.Model)
-                .ToListAsync();
+            
+            var result = await _vehicleRepo.GetVehiclesAsync();
 
             foreach (var vehicle in result)
             {
@@ -46,7 +43,7 @@ namespace API.Controllers
                     FuelType = vehicle.FuelType,
                     GearType = vehicle.GearType,
                     Color = vehicle.Color,
-                    Mileage = vehicle.Mileage,
+                    Mileage = vehicle.Mileage
                 };
 
                 vehicles.Add(v);
@@ -60,9 +57,10 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Vehicle>> GetVehicle(int id)
         {
-            var result = await _vehicleRepo.GetVehicleById(id);
-
+            var result = await _vehicleRepo.GetVehicleByIdAsync(id);
             var vehicle = _mapper.Map<PresVehicleViewModel>(result);
+            return Ok(vehicle);
+
             /*
             if (vehicle == null)
             {
@@ -71,20 +69,21 @@ namespace API.Controllers
 
             return vehicle;
             */
-            return Ok(vehicle);
         }
 
-        [HttpGet("{regNum}")]
+        [HttpGet("find/{regNum}")]
         public async Task<ActionResult<Vehicle>> FindVehicle(string regNum)
         {
-            var vehicle = await _context.Vehicles.FirstOrDefaultAsync(c => c.RegNum == regNum);
+            var result = await _vehicleRepo.GetVehicleByRegNumAsync(regNum);
 
+            /*
             if (vehicle == null)
             {
                 return NotFound($"Sorry, no vehicle found with registration number {regNum}");
             }
+            */
 
-            return vehicle;
+            return Ok(result);
         }
 
         [HttpPost()]
@@ -129,10 +128,7 @@ namespace API.Controllers
                 Brand = vehicleBrand.Name,
                 Model = vehicleModel.Description,
                 ModelYear = vehicle.ModelYear,
-                FuelType = vehicle.FuelType,
-                GearType = vehicle.GearType,
                 Color = vehicle.Color,
-                Mileage = vehicle.Mileage
             };
 
             //return CreatedAtAction(nameof(GetVehicle), result);

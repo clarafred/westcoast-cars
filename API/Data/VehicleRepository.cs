@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
 using API.Interfaces;
+using API.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
@@ -14,22 +16,39 @@ namespace API.Data
             _context = context;
         }
 
-        public Task<Vehicle> GetVehicleById(int id)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<Vehicle> GetVehicleByRegNumAsync(string regNum)
-        {
-            throw new System.NotImplementedException();
-        }
-
         public async Task<IEnumerable<Vehicle>> GetVehiclesAsync()
         {
             return await _context.Vehicles
-                .Include(c => c.Brand)
-                .Include(c => c.Model)
-                .ToListAsync();
+            .Include(c => c.Brand)
+            .Include(c => c.Model)
+            .ToListAsync();
         }
+        public async Task<Vehicle> GetVehicleByIdAsync(int id)
+        {
+            return await _context.Vehicles
+            .Include(c => c.Brand)
+            .Include(c => c.Model)
+            .SingleOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task<PresVehicleViewModel> GetVehicleByRegNumAsync(string regNum)
+        {
+            return await _context.Vehicles
+            .Include(c => c.Brand)
+            .Include(c => c.Model)
+            .Select(v => new PresVehicleViewModel{
+                Id = v.Id,
+                RegNum = v.RegNum,
+                Brand = v.Brand.Name,
+                Model = v.Model.Description,
+                ModelYear = v.ModelYear,
+                FuelType = v.FuelType,
+                GearType = v.GearType,
+                Color = v.Color,
+                Mileage = v.Mileage
+            })
+            .SingleOrDefaultAsync(c => c.RegNum == regNum);
+        }
+
     }
 }
