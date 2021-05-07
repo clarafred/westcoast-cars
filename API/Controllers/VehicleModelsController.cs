@@ -37,13 +37,12 @@ namespace API.Controllers
                 var newModel = new VehicleModel
                 {
                     Description = model.Description
-                };              
-
+                };
+                
                 if (await _modelRepo.SaveAllAsync()) return StatusCode(201, newModel);
 
                 return StatusCode(500, "Not able to save model");
             }
-
             catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);

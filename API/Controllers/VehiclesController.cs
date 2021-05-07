@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.Data;
@@ -16,9 +17,9 @@ namespace API.Controllers
     {
         private readonly IVehicleRepository _vehicleRepo;
         private readonly IMapper _mapper;
-        private readonly BrandRepository _brandRepo;
+        private readonly IBrandRepository _brandRepo;
         private readonly IVehicleModelRepository _modelRepo;
-        public VehiclesController(IVehicleRepository vehicleRepo, BrandRepository brandRepo, IVehicleModelRepository modelRepo, IMapper mapper)
+        public VehiclesController(IVehicleRepository vehicleRepo, IBrandRepository brandRepo, IVehicleModelRepository modelRepo, IMapper mapper)
         {
             _vehicleRepo = vehicleRepo;
             _brandRepo = brandRepo;
@@ -59,36 +60,40 @@ namespace API.Controllers
         [HttpPost()]
         public async Task<ActionResult> AddVehicle(AddVehicleDto model)
         {
-            var brand = await _brandRepo.GetBrandByNameAsync(model.Brand);
-            if (brand == null) return BadRequest($"Brand {model.Brand} does not excist in system");
-
-            var vehicleModel = await _modelRepo.GetModelByNameAsync(model.Model);
-            if (vehicleModel == null) return BadRequest($"Model {model.Model} does not excist in system");
-
-            var vehicle = new Vehicle
+            try
             {
-                RegNum = model.RegNum,
-                BrandId = brand.Id,
-                ModelId = vehicleModel.Id,
-                ModelYear = model.ModelYear,
-                FuelType = model.FuelType,
-                GearType = model.GearType,
-                Color = model.Color,
-                Mileage = model.Mileage
-            };
+                var brand = await _brandRepo.GetBrandByNameAsync(model.Brand);
+                if (brand == null) return BadRequest($"Brand {model.Brand} does not excist in system");
 
-            _vehicleRepo.Add(vehicle);
+                var vehicleModel = await _modelRepo.GetModelByNameAsync(model.Model);
+                if (vehicleModel == null) return BadRequest($"Model {model.Model} does not excist in system");
 
-            //sparar data fysiskt till databasen
-            if (await _vehicleRepo.SaveAllAsync()) return StatusCode(201, vehicle);
+                var vehicle = new Vehicle
+                {
+                    RegNum = model.RegNum,
+                    BrandId = brand.Id,
+                    ModelId = vehicleModel.Id,
+                    ModelYear = model.ModelYear,
+                    FuelType = model.FuelType,
+                    GearType = model.GearType,
+                    Color = model.Color,
+                    Mileage = model.Mileage
+                };
 
-            return StatusCode(500, "Not able to save vehicle");
+                _vehicleRepo.Add(vehicle);
+                if (await _vehicleRepo.SaveAllAsync()) 
+                {
+                    var newVehicle = _mapper.Map<VehicleViewModel>(vehicle);
+                    return StatusCode(201, newVehicle);
+                    //return CreatedAtAction(nameof(GetVehicle), result);
+                }    
 
-            //mappa till en view model för retur
-            //var newVehicle = _mapper.Map<VehicleViewModel>(vehicle);
-
-            //return CreatedAtAction(nameof(GetVehicle), result);
-            //return StatusCode(201, newVehicle);
+                return StatusCode(500, "Not able to save vehicle");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPatch("{id}")]

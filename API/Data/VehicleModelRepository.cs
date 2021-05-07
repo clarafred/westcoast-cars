@@ -35,14 +35,14 @@ namespace API.Data
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public void Add(VehicleModel model)
+        public void Add(VehicleModel vehicleModel)
         {
-            _context.Entry(model).State = EntityState.Added;
+            _context.Entry(vehicleModel).State = EntityState.Added;
         }
 
-        public void Update(VehicleModel model)
+        public void Update(VehicleModel vehicleModel)
         {
-            _context.Entry(model).State = EntityState.Modified;
+            _context.Entry(vehicleModel).State = EntityState.Modified;
         }
     }
 }
