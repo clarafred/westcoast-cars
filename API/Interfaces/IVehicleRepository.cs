@@ -7,12 +7,12 @@ namespace API.Interfaces
 {
     public interface IVehicleRepository
     {
-        Task<IEnumerable<Vehicle>> GetVehiclesAsync();
-        Task<Vehicle> GetVehicleByIdAsync(int id);
+        Task<IEnumerable<VehicleViewModel>> GetVehiclesAsync();
+        Task<VehicleViewModel> GetVehicleByIdAsync(int id);
         Task<VehicleViewModel> GetVehicleByRegNumAsync(string regNum);
         Task<bool> SaveAllAsync();
-        void Add(Vehicle vehicle);
-        void Update(Vehicle vehicle);
-        void Delete(Vehicle vehicle);
+        void Add(AddVehicleDto vehicle);
+        void Update(VehicleViewModel vehicle);
+        void Delete(VehicleViewModel vehicle);
     }
 }

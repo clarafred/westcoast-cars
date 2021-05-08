@@ -12,8 +12,13 @@ namespace API.Helpers
             .ForMember(dest => dest.Brand, opt => opt.MapFrom(src => src.Brand.Name))
             .ForMember(dest => dest.Model, opt => opt.MapFrom(src => src.Model.Description));
 
+            CreateMap<AddVehicleDto, Vehicle>()
+            .ForMember(dest => dest.Brand, opt => opt.MapFrom<AddVehicleBrandResolver>())
+            .ForMember(dest => dest.Model, opt => opt.MapFrom<AddVehicleModelResolver>());
+
             CreateMap<Brand, BrandViewModel>()
             .ForMember(dest => dest.BrandName, opt => opt.MapFrom(src => src.Name));
+
         }
     }
 }

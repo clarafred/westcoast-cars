@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using API.Entities;
 using API.Interfaces;
 using API.ViewModels;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
@@ -11,42 +13,30 @@ namespace API.Data
     public class VehicleRepository : IVehicleRepository
     {
         private readonly DataContext _context;
-        public VehicleRepository(DataContext context)
+        private readonly IMapper _mapper;
+        public VehicleRepository(DataContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        public async Task<IEnumerable<Vehicle>> GetVehiclesAsync()
+        public async Task<IEnumerable<VehicleViewModel>> GetVehiclesAsync()
         {
             return await _context.Vehicles
-            .Include(c => c.Brand)
-            .Include(c => c.Model)
+            .ProjectTo<VehicleViewModel>(_mapper.ConfigurationProvider)
             .ToListAsync();
         }
-        public async Task<Vehicle> GetVehicleByIdAsync(int id)
+        public async Task<VehicleViewModel> GetVehicleByIdAsync(int id)
         {
             return await _context.Vehicles
-            .Include(c => c.Brand)
-            .Include(c => c.Model)
+            .ProjectTo<VehicleViewModel>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task<VehicleViewModel> GetVehicleByRegNumAsync(string regNum)
         {
             return await _context.Vehicles
-            .Include(c => c.Brand)
-            .Include(c => c.Model)
-            .Select(v => new VehicleViewModel{
-                Id = v.Id,
-                RegNum = v.RegNum,
-                Brand = v.Brand.Name,
-                Model = v.Model.Description,
-                ModelYear = v.ModelYear,
-                FuelType = v.FuelType,
-                GearType = v.GearType,
-                Color = v.Color,
-                Mileage = v.Mileage
-            })
+            .ProjectTo<VehicleViewModel>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync(c => c.RegNum == regNum);
         }
 
@@ -54,17 +44,27 @@ namespace API.Data
         {
             return await _context.SaveChangesAsync() > 0;
         }
-        public void Add(Vehicle vehicle)
+        public void Add(AddVehicleDto vehicle)
         {
-            _context.Entry(vehicle).State = EntityState.Added;
+            var vehicleToAdd = _mapper.Map<Vehicle>(vehicle, opt =>
+            {
+                opt.Items["repo"] = _context;
+            });
+
+            _context.Entry(vehicleToAdd).State = EntityState.Added;
         }
 
-        public void Update(Vehicle vehicle)
+        public void Update(VehicleViewModel vehicle)
         {
-            _context.Entry(vehicle).State = EntityState.Modified;
+            var vehicleToUpdate = _mapper.Map<Vehicle>(vehicle, opt =>
+            {
+                opt.Items["repo"] = _context;
+            });
+
+            _context.Entry(vehicleToUpdate).State = EntityState.Modified;
         }
 
-        public void Delete(Vehicle vehicle)
+        public void Delete(VehicleViewModel vehicle)
         {
             _context.Entry(vehicle).State = EntityState.Deleted;
         }
