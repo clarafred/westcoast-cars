@@ -39,11 +39,7 @@ namespace API.Data
             .ProjectTo<VehicleViewModel>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync(c => c.RegNum == regNum);
         }
-
-        public async Task<bool> SaveAllAsync()
-        {
-            return await _context.SaveChangesAsync() > 0;
-        }
+        
         public void Add(AddVehicleDto vehicle)
         {
             var vehicleToAdd = _mapper.Map<Vehicle>(vehicle, opt =>

@@ -37,6 +37,7 @@ namespace API
             services.AddScoped<IVehicleRepository, VehicleRepository>();
             services.AddScoped<IBrandRepository, BrandRepository>();
             services.AddScoped<IVehicleModelRepository, VehicleModelRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
 

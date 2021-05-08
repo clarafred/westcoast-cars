@@ -10,7 +10,6 @@ namespace API.Interfaces
         Task<IEnumerable<VehicleViewModel>> GetVehiclesAsync();
         Task<VehicleViewModel> GetVehicleByIdAsync(int id);
         Task<VehicleViewModel> GetVehicleByRegNumAsync(string regNum);
-        Task<bool> SaveAllAsync();
         void Add(AddVehicleDto vehicle);
         void Update(VehicleViewModel vehicle);
         void Delete(VehicleViewModel vehicle);
