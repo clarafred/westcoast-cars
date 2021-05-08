@@ -80,7 +80,7 @@ namespace API.Controllers
         [HttpPatch("{id}")]
         public async Task<ActionResult> UpdateVehicle(int id, UpdateVehicleDto model)
         {
-            /*
+            
             var vehicle = await _vehicleRepo.GetVehicleByIdAsync(id);
             if (vehicle == null) return NotFound($"No vehicle found with id {id}");
 
@@ -91,14 +91,11 @@ namespace API.Controllers
             if (await _vehicleRepo.SaveAllAsync()) return NoContent();
             
             return StatusCode(500, "Not able to update vehicle");
-            */
-            return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteVehicle(int id)
         {
-            /*
             var vehicle = await _vehicleRepo.GetVehicleByIdAsync(id);
             if (vehicle == null) return NotFound($"No vehicle found with id {id}");
 
@@ -107,8 +104,6 @@ namespace API.Controllers
             if (await _vehicleRepo.SaveAllAsync()) return NoContent();
 
             return StatusCode(500, "Not able to delete vehicle");
-            */
-            return NoContent();
         }
     }
 }
