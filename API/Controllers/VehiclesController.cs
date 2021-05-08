@@ -81,6 +81,7 @@ namespace API.Controllers
             return StatusCode(500, "Not able to update vehicle");
         }
 
+        //fungerar icke
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteVehicle(int id)
         {
