@@ -6,11 +6,11 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace API.Data.Migrations
+namespace API.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20210502190056_NormalizationBrand")]
-    partial class NormalizationBrand
+    [Migration("20210509162903_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -28,29 +28,29 @@ namespace API.Data.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("VARCHAR(50)");
 
                     b.Property<string>("Country")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("VARCHAR(50)");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("VARCHAR(128)");
 
                     b.Property<string>("FirstName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("VARCHAR(30)");
 
                     b.Property<string>("LastName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("VARCHAR(40)");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("VARCHAR(15)");
 
                     b.Property<string>("UserName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("VARCHAR(128)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("User", "Customers");
                 });
 
             modelBuilder.Entity("API.Entities.Brand", b =>
@@ -61,11 +61,11 @@ namespace API.Data.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("VARCHAR(80)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Brand");
+                    b.ToTable("Manufacturer", "Vehicles");
                 });
 
             modelBuilder.Entity("API.Entities.Vehicle", b =>
@@ -79,31 +79,48 @@ namespace API.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Color")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("VARCHAR(30)");
 
                     b.Property<string>("FuelType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("VARCHAR(15)");
 
                     b.Property<string>("GearType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("VARCHAR(40)");
 
                     b.Property<int>("Mileage")
                         .HasColumnType("int");
 
-                    b.Property<string>("Model")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ModelYear")
+                    b.Property<int>("ModelId")
                         .HasColumnType("int");
 
+                    b.Property<short>("ModelYear")
+                        .HasColumnType("SMALLINT");
+
                     b.Property<string>("RegNum")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("VARCHAR(10)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("BrandId");
 
-                    b.ToTable("Vehicles");
+                    b.HasIndex("ModelId");
+
+                    b.ToTable("Vehicle", "Vehicles");
+                });
+
+            modelBuilder.Entity("API.Entities.VehicleModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Description")
+                        .HasColumnType("VARCHAR(80)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VehicleModel", "Vehicles");
                 });
 
             modelBuilder.Entity("API.Entities.Vehicle", b =>
@@ -114,10 +131,23 @@ namespace API.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("API.Entities.VehicleModel", "Model")
+                        .WithMany("Vehicles")
+                        .HasForeignKey("ModelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Brand");
+
+                    b.Navigation("Model");
                 });
 
             modelBuilder.Entity("API.Entities.Brand", b =>
+                {
+                    b.Navigation("Vehicles");
+                });
+
+            modelBuilder.Entity("API.Entities.VehicleModel", b =>
                 {
                     b.Navigation("Vehicles");
                 });
