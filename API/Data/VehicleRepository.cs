@@ -33,6 +33,12 @@ namespace API.Data
             .SingleOrDefaultAsync(c => c.Id == id);
         }
 
+        public async Task<Vehicle> GetVehicleForDeleteByIdAsync(int id)
+        {
+            return await _context.Vehicles
+            .SingleOrDefaultAsync(c => c.Id == id);
+        }
+
         public async Task<VehicleViewModel> GetVehicleByRegNumAsync(string regNum)
         {
             return await _context.Vehicles
@@ -60,7 +66,7 @@ namespace API.Data
             _context.Entry(vehicleToUpdate).State = EntityState.Modified;
         }
 
-        public void Delete(VehicleViewModel vehicle)
+        public void Delete(Vehicle vehicle)
         {
             _context.Entry(vehicle).State = EntityState.Deleted;
         }

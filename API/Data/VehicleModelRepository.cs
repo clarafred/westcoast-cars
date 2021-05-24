@@ -30,11 +30,6 @@ namespace API.Data
             return await _context.VehicleModels.SingleOrDefaultAsync(m => m.Description.ToLower() == name.ToLower());
         }
 
-        public async Task<bool> SaveAllAsync()
-        {
-            return await _context.SaveChangesAsync() > 0;
-        }
-
         public void Add(VehicleModel vehicleModel)
         {
             _context.Entry(vehicleModel).State = EntityState.Added;
@@ -43,6 +38,10 @@ namespace API.Data
         public void Update(VehicleModel vehicleModel)
         {
             _context.Entry(vehicleModel).State = EntityState.Modified;
+        }
+        public async Task<bool> SaveAllAsync()
+        {
+            return await _context.SaveChangesAsync() > 0;
         }
     }
 }

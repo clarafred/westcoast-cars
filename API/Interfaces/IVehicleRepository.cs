@@ -9,9 +9,10 @@ namespace API.Interfaces
     {
         Task<IEnumerable<VehicleViewModel>> GetVehiclesAsync();
         Task<VehicleViewModel> GetVehicleByIdAsync(int id);
+        Task<Vehicle> GetVehicleForDeleteByIdAsync(int id);
         Task<VehicleViewModel> GetVehicleByRegNumAsync(string regNum);
         void Add(AddVehicleDto vehicle);
         void Update(VehicleViewModel vehicle);
-        void Delete(VehicleViewModel vehicle);
+        void Delete(Vehicle vehicle);
     }
 }

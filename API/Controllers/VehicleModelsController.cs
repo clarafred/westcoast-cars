@@ -38,6 +38,8 @@ namespace API.Controllers
                 {
                     Description = model.Description
                 };
+
+                _modelRepo.Add(newModel);
                 
                 if (await _modelRepo.SaveAllAsync()) return StatusCode(201, newModel);
 

@@ -85,7 +85,7 @@ namespace API.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteVehicle(int id)
         {
-            var vehicle = await _unitOfWork.VehicleRepository.GetVehicleByIdAsync(id);
+            var vehicle = await _unitOfWork.VehicleRepository.GetVehicleForDeleteByIdAsync(id);
             if (vehicle == null) return NotFound($"No vehicle found with id {id}");
 
             _unitOfWork.VehicleRepository.Delete(vehicle);
