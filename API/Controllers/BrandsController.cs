@@ -15,28 +15,27 @@ namespace API.Controllers
     [Route("api/brands")]
     public class BrandsController : ControllerBase
     {
-        private readonly IBrandRepository _brandRepo;
         private readonly IMapper _mapper;
-        public BrandsController(IBrandRepository brandRepo, IMapper mapper)
+        private readonly IUnitOfWork _unitOfWork;
+        public BrandsController(IMapper mapper, IUnitOfWork unitOfWork)
         {
-            _brandRepo = brandRepo;
+            //flytta mapper till repot
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
         [HttpGet()]
         public async Task<ActionResult<IEnumerable<Brand>>> GetBrands()
         {
-            var result = await _brandRepo.GetBrandsAsync();
-            var brands = _mapper.Map<IEnumerable<BrandViewModel>>(result);
-            return Ok(brands);
+            return Ok(await _unitOfWork.BrandRepository.GetBrandsAsync());
         }
 
         [HttpGet("{name}")]
         public async Task<ActionResult<Brand>> GetBrandByName(string name)
         {
-            var result = await _brandRepo.GetBrandByNameAsync(name);
+            var result = await _unitOfWork.BrandRepository.GetBrandByNameAsync(name);
             if (result == null) return NotFound($"Brand {name} does not excist in system");
-            
+
             var brand = _mapper.Map<BrandViewModel>(result);
 
             return Ok(brand);
@@ -47,7 +46,7 @@ namespace API.Controllers
         {
             try
             {
-                var brandResult = await _brandRepo.GetBrandByNameAsync(model.Name);
+                var brandResult = await _unitOfWork.BrandRepository.GetBrandByNameAsync(model.Name);
                 if (brandResult != null) return BadRequest("Brand is already in the system");
 
                 var brand = new Brand
@@ -55,13 +54,12 @@ namespace API.Controllers
                     Name = model.Name
                 };
 
-                _brandRepo.Add(brand);
+                _unitOfWork.BrandRepository.Add(brand);
 
-                if (await _brandRepo.SaveAllAsync()) return StatusCode(201, brand);
+                if (await _unitOfWork.Complete()) return StatusCode(201, brand);
 
                 return StatusCode(500, "Not able to save brand");
             }
-
             catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);
@@ -73,20 +71,19 @@ namespace API.Controllers
         {
             try
             {
-                var brand = await _brandRepo.GetBrandByIdAsync(id);
+                var brand = await _unitOfWork.BrandRepository.GetBrandByIdAsync(id);
                 if (brand == null) return NotFound($"No brand found with id {id}");
 
                 //var nameResult = await _context.Brands.FirstOrDefaultAsync(c => c.Name.ToLower() == model.Name.ToLower());
                 //if (nameResult == null) return BadRequest("Brand is already in the system");
 
                 brand.Name = model.Name;
-                _brandRepo.Update(brand);
+                _unitOfWork.BrandRepository.Update(brand);
 
-                if (await _brandRepo.SaveAllAsync()) return NoContent();
+                if (await _unitOfWork.Complete()) return NoContent();
 
                 return StatusCode(500, "Not able to update brand");
             }
-
             catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);

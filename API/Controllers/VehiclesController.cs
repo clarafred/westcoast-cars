@@ -52,6 +52,8 @@ namespace API.Controllers
 
                 var vehicleModel = await _unitOfWork.VehicleModelRepository.GetModelByNameAsync(model.Model);
                 if (vehicleModel == null) return BadRequest($"Model {model.Model} does not excist in system");
+
+                //kolla att regnummer ej finns så bilar ej blir duplicerade
                                 
                 _unitOfWork.VehicleRepository.Add(model);
 
@@ -68,31 +70,43 @@ namespace API.Controllers
         [HttpPatch("{id}")]
         public async Task<ActionResult> UpdateVehicle(int id, UpdateVehicleDto model)
         {
-            
-            var vehicle = await _unitOfWork.VehicleRepository.GetVehicleByIdAsync(id);
-            if (vehicle == null) return NotFound($"No vehicle found with id {id}");
+            try
+            {
+                var vehicle = await _unitOfWork.VehicleRepository.GetVehicleByIdAsync(id);
+                if (vehicle == null) return NotFound($"No vehicle found with id {id}");
 
-            vehicle.Color = model.Color;
-            vehicle.Mileage = model.Mileage;
+                vehicle.Color = model.Color;
+                vehicle.Mileage = model.Mileage;
 
-            _unitOfWork.VehicleRepository.Update(vehicle);
-            if (await _unitOfWork.Complete()) return NoContent();
+                _unitOfWork.VehicleRepository.Update(vehicle);
+                if (await _unitOfWork.Complete()) return NoContent();
 
-            return StatusCode(500, "Not able to update vehicle");
+                return StatusCode(500, "Not able to update vehicle");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
-        //fungerar icke
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteVehicle(int id)
         {
-            var vehicle = await _unitOfWork.VehicleRepository.GetVehicleForDeleteByIdAsync(id);
-            if (vehicle == null) return NotFound($"No vehicle found with id {id}");
+            try
+            {
+                var vehicle = await _unitOfWork.VehicleRepository.GetVehicleForDeleteByIdAsync(id);
+                if (vehicle == null) return NotFound($"No vehicle found with id {id}");
 
-            _unitOfWork.VehicleRepository.Delete(vehicle);
-            
-            if (await _unitOfWork.Complete()) return NoContent();
+                _unitOfWork.VehicleRepository.Delete(vehicle);
+                
+                if (await _unitOfWork.Complete()) return NoContent();
 
-            return StatusCode(500, "Not able to delete vehicle");
+                return StatusCode(500, "Not able to delete vehicle");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }

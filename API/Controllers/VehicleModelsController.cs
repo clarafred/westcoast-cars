@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using API.Data;
 using API.Entities;
 using API.Interfaces;
 using API.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -14,16 +12,16 @@ namespace API.Controllers
     [Route("api/vehiclemodels")]
     public class VehicleModelsController : ControllerBase
     {
-        private readonly IVehicleModelRepository _modelRepo;
-        public VehicleModelsController(IVehicleModelRepository modelRepo)
+        private readonly IUnitOfWork _unitOfWork;
+        public VehicleModelsController(IUnitOfWork unitOfWork)
         {
-            _modelRepo = modelRepo;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet()]
         public async Task<ActionResult<IEnumerable<VehicleModel>>> GetVehicleModels()
         {
-            return Ok(await _modelRepo.GetModelsAsync());
+            return Ok(await _unitOfWork.VehicleModelRepository.GetModelsAsync());
         }
 
         [HttpPost()]
@@ -31,7 +29,7 @@ namespace API.Controllers
         {
             try
             {
-                var vehicleModel = await _modelRepo.GetModelByNameAsync(model.Description);
+                var vehicleModel = await _unitOfWork.VehicleModelRepository.GetModelByNameAsync(model.Description);
                 if (vehicleModel != null) return BadRequest("Model is already in system");
 
                 var newModel = new VehicleModel
@@ -39,9 +37,9 @@ namespace API.Controllers
                     Description = model.Description
                 };
 
-                _modelRepo.Add(newModel);
-                
-                if (await _modelRepo.SaveAllAsync()) return StatusCode(201, newModel);
+                _unitOfWork.VehicleModelRepository.Add(newModel);
+
+                if (await _unitOfWork.Complete()) return StatusCode(201, newModel);
 
                 return StatusCode(500, "Not able to save model");
             }
@@ -54,18 +52,25 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateVehicleModel(int id, AddVehicleModelDto model)
         {
-            var vehicleModel = await _modelRepo.GetModelByIdAsync(id);
-            if (vehicleModel == null) return NotFound($"No model found with id {id}");
+            try
+            {
+                var vehicleModel = await _unitOfWork.VehicleModelRepository.GetModelByIdAsync(id);
+                if (vehicleModel == null) return NotFound($"No model found with id {id}");
 
-            //var modelName = await _context.VehicleModels.FirstOrDefaultAsync(c => c.Name.ToLower() == model.Name.ToLower());
-            //if (modelName == null) return BadRequest("Model is already in the system");
+                //var modelName = await _context.VehicleModels.FirstOrDefaultAsync(c => c.Name.ToLower() == model.Name.ToLower());
+                //if (modelName == null) return BadRequest("Model is already in the system");
 
-            vehicleModel.Description = model.Description;
-            _modelRepo.Update(vehicleModel);
+                vehicleModel.Description = model.Description;
+                _unitOfWork.VehicleModelRepository.Update(vehicleModel);
 
-            if (await _modelRepo.SaveAllAsync()) return StatusCode(201, vehicleModel);
+                if (await _unitOfWork.Complete()) return NoContent();
 
-            return StatusCode(500, "Not able to update model");
+                return StatusCode(500, "Not able to update model");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }

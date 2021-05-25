@@ -11,7 +11,7 @@ namespace API.Helpers
     public Brand Resolve(VehicleViewModel source, Vehicle destination, Brand destMember, ResolutionContext context)
     {
       var repo = context.Items["repo"] as DataContext;
-      var result = repo.Brands.SingleOrDefault(c => c.Name.ToLower() == source.Brand);
+      var result = repo.Brands.SingleOrDefault(c => c.Name.ToLower() == source.Brand.ToLower());
       return result;
     }
   }
@@ -21,7 +21,7 @@ namespace API.Helpers
     public Brand Resolve(AddVehicleDto source, Vehicle destination, Brand destMember, ResolutionContext context)
     {
       var repo = context.Items["repo"] as DataContext;
-      var result = repo.Brands.SingleOrDefault(c => c.Name.ToLower() == source.Brand);
+      var result = repo.Brands.SingleOrDefault(c => c.Name.ToLower() == source.Brand.ToLower());
       return result;
     }
   }
@@ -31,7 +31,7 @@ namespace API.Helpers
     public VehicleModel Resolve(VehicleViewModel source, Vehicle destination, VehicleModel destMember, ResolutionContext context)
     {
       var repo = context.Items["repo"] as DataContext;
-      var result = repo.VehicleModels.SingleOrDefault(c => c.Description.ToLower() == source.Model);
+      var result = repo.VehicleModels.SingleOrDefault(c => c.Description.ToLower() == source.Model.ToLower());
       return result;
     }
   }
@@ -41,7 +41,7 @@ namespace API.Helpers
     public VehicleModel Resolve(AddVehicleDto source, Vehicle destination, VehicleModel destMember, ResolutionContext context)
     {
       var repo = context.Items["repo"] as DataContext;
-      var result = repo.VehicleModels.SingleOrDefault(c => c.Description.ToLower() == source.Model);
+      var result = repo.VehicleModels.SingleOrDefault(c => c.Description.ToLower() == source.Model.ToLower());
       return result;
     }
   }

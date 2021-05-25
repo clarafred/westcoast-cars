@@ -29,10 +29,6 @@ namespace API.Data
             return await _context.Brands.SingleOrDefaultAsync(b => b.Name.ToLower() == name.ToLower());
         }
 
-        public async Task<bool> SaveAllAsync()
-        {
-            return await _context.SaveChangesAsync() > 0;
-        }
         public void Add(Brand brand)
         {
             _context.Entry(brand).State = EntityState.Added;

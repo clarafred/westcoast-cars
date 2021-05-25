@@ -39,9 +39,5 @@ namespace API.Data
         {
             _context.Entry(vehicleModel).State = EntityState.Modified;
         }
-        public async Task<bool> SaveAllAsync()
-        {
-            return await _context.SaveChangesAsync() > 0;
-        }
     }
 }
